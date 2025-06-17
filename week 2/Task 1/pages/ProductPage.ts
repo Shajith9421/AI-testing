@@ -2,20 +2,29 @@ import { Page } from '@playwright/test';
 
 export class ProductPage {
   readonly page: Page;
-  readonly productLink: (productName: string) => string;
-  readonly addToCartButton: string;
+  readonly productDetailLink: (productName: string) => string;
+  readonly addToCartButtonOnDetailPage: string;
+  readonly productCard: (productName: string) => string;
+  readonly addToCartButtonOnListing: (productName: string) => string;
 
   constructor(page: Page) {
     this.page = page;
-    this.productLink = (productName: string) => `text=${productName}`;
-    this.addToCartButton = '.btn.btn-success.btn-lg';
+    this.productDetailLink = (productName: string) => `a:has-text('${productName}')`;
+    this.addToCartButtonOnDetailPage = 'button.btn.btn-default.cart';
+    this.productCard = (productName: string) => `div.productinfo:has-text('${productName}')`;
+    this.addToCartButtonOnListing = (productName: string) => `div.single-products:has-text('${productName}') button.add-to-cart`;
   }
 
   async selectProduct(productName: string) {
-    await this.page.click(this.productLink(productName));
+    await this.page.click(this.productDetailLink(productName));
   }
 
-  async addProductToCart() {
-    await this.page.click(this.addToCartButton);
+  async addProductToCartFromDetailPage() {
+    await this.page.click(this.addToCartButtonOnDetailPage);
+  }
+
+  async addProductToCartFromListing(productName: string) {
+    await this.page.hover(this.productCard(productName));
+    await this.page.click(this.addToCartButtonOnListing(productName));
   }
 } 

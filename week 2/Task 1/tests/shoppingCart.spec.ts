@@ -23,50 +23,35 @@ test.describe('Shopping Cart and Checkout Functionality', () => {
     await page.goto('/');
     // Pre-condition: Only registered users can add items to the cart and checkout
     // Log in a valid user before proceeding with cart operations.
-    await loginPage.navigateToLogin();
-    await loginPage.login('testuser', 'testpassword'); // Use a valid test user
-    await expect(page.locator(loginPage.welcomeMessage)).toBeVisible();
+    await loginPage.navigateToLoginPage();
+    await loginPage.login('test@test.com', 'password');
+    await expect(page.locator('a:has-text("Logged in as")')).toBeVisible();
     await homePage.verifyHomePageLoaded();
   });
 
-  test('should add an item to cart and checkout with discount for a registered user', async ({ page }) => {
-    const productName = 'Iphone 6'; // Changed to Iphone 6 as Iphone 15 is not on the demo site
-    const discountCode = 'DISCOUNT10'; // Example discount code
+  test('should add an item to cart and checkout for a registered user', async ({ page }) => {
+    const productName = 'Blue Top';
 
-    // 6. Search for the product (navigate directly for demo site)
-    // For demoblaze, we click on the product directly as there's no search bar.
-    await productPage.selectProduct(productName);
+    // Add an item to the cart from the product listing
+    await productPage.addProductToCartFromListing(productName);
 
-    // 7. Add an item to the cart
-    await productPage.addProductToCart();
+    // Click 'Continue Shopping' in the modal that appears after adding to cart
+    await page.locator('button:has-text("Continue Shopping")').click();
 
-    // Handle the alert after adding to cart
-    page.on('dialog', async dialog => {
-      expect(dialog.message()).toContain('Product added');
-      await dialog.accept();
-    });
-    // Wait for the alert to be handled before navigating away
-    await page.waitForTimeout(1000); // Small delay to ensure alert is processed
-
-    // 8. Click check out the cart (Navigate to cart first)
+    // Navigate to cart
     await cartPage.navigateToCart();
     await cartPage.verifyProductInCart(productName);
     await cartPage.proceedToCheckout();
 
-    // Fill checkout form
-    await checkoutPage.fillCheckoutForm(
-      'John Doe',
-      'USA',
-      'New York',
-      '1234567890123456',
+    // Fill payment form (replace with valid payment details for the site)
+    // These are dummy values; use actual valid test card details if required for testing.
+    await checkoutPage.fillPaymentForm(
+      'Test User',
+      '4000 0000 0000 0000',
+      '123',
       '12',
       '2025'
     );
-
-    // 9. Apply discount in shopping cart
-    // NOTE: The demoblaze.com website does not have an explicit discount code input field.
-    // This step is conceptual for a generic e-commerce site.
-    await checkoutPage.applyDiscount(discountCode);
 
     // Complete purchase
     await checkoutPage.completePurchase();
@@ -76,18 +61,13 @@ test.describe('Shopping Cart and Checkout Functionality', () => {
   });
 
   test('should remove an item from the cart', async ({ page }) => {
-    const productName = 'Samsung galaxy s6'; // Example product name
+    const productName = 'Men Tshirt';
 
     // Add item to cart
-    await productPage.selectProduct(productName);
-    await productPage.addProductToCart();
+    await productPage.addProductToCartFromListing(productName);
 
-    // Handle the alert after adding to cart
-    page.on('dialog', async dialog => {
-      expect(dialog.message()).toContain('Product added');
-      await dialog.accept();
-    });
-    await page.waitForTimeout(1000); // Small delay to ensure alert is processed
+    // Click 'Continue Shopping' in the modal that appears after adding to cart
+    await page.locator('button:has-text("Continue Shopping")').click();
 
     // Navigate to cart and verify item
     await cartPage.navigateToCart();

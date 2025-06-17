@@ -2,27 +2,26 @@ import { Page } from '@playwright/test';
 
 export class LoginPage {
   readonly page: Page;
-  readonly loginLink: string;
-  readonly usernameInput: string;
+  readonly signupLoginLink: string;
+  readonly emailInput: string;
   readonly passwordInput: string;
   readonly loginButton: string;
-  readonly welcomeMessage: string;
 
   constructor(page: Page) {
     this.page = page;
-    this.loginLink = '#login2';
-    this.usernameInput = '#loginusername';
-    this.passwordInput = '#loginpassword';
-    this.loginButton = 'button[onclick="logIn()"]';
-    this.welcomeMessage = '#nameofuser';
+    this.signupLoginLink = 'a[href="/login"]';
+    this.emailInput = 'input[data-qa="login-email"]';
+    this.passwordInput = 'input[data-qa="login-password"]';
+    this.loginButton = 'button[data-qa="login-button"]';
   }
 
-  async navigateToLogin() {
-    await this.page.click(this.loginLink);
+  async navigateToLoginPage() {
+    await this.page.click(this.signupLoginLink);
+    await this.page.waitForURL('**/login');
   }
 
-  async login(username: string, password: string) {
-    await this.page.fill(this.usernameInput, username);
+  async login(email: string, password: string) {
+    await this.page.fill(this.emailInput, email);
     await this.page.fill(this.passwordInput, password);
     await this.page.click(this.loginButton);
   }

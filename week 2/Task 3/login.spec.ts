@@ -1,11 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-// Define a base URL for your dummy login website
-const BASE_URL = 'https://example-login.com';
-
-// Define valid credentials for the happy path test
-const VALID_USERNAME = 'testuser';
-const VALID_PASSWORD = 'Test@1234';
+import { LoginPage } from '../Task 1/pages/LoginPage'; // Import the LoginPage POM
 
 // Function to generate a random string for invalid credentials
 function generateRandomString(length: number): string {
@@ -18,41 +12,29 @@ function generateRandomString(length: number): string {
   return result;
 }
 
-test.describe('Login Functionality Tests', () => {
+test.describe('Login Functionality Tests (Task 3)', () => {
+  let loginPage: LoginPage;
 
-  // Before each test, navigate to the login page
+  // Before each test, navigate to the base URL and then to the login page
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE_URL);
-    // Assuming the login page is the base URL. Adjust if the login page is a sub-path (e.g., '/login')
-    // await page.goto(`${BASE_URL}/login`);
+    loginPage = new LoginPage(page);
+    await page.goto('/'); // Go to the base URL defined in playwright.config.ts
+    await loginPage.navigateToLoginPage(); // Navigate to the login page using POM
   });
 
   /**
    * @testCaseID LFT_001
    * @title Positive Login Test: Successful login with valid credentials
-   * @description Verifies that a user can successfully log in using correct username and password.
+   * @description Verifies that a user can successfully log in using correct email and password.
    */
   test('should allow successful login with valid credentials', async ({ page }) => {
-    // Locate username, password input fields and the submit button
-    const usernameInput = page.locator('input[name="username"]');
-    const passwordInput = page.locator('input[name="password"]');
-    const loginButton = page.locator('button[type="submit"]');
+    // Enter valid credentials using POM method (replace with actual working credentials for automationexercise.com)
+    await loginPage.login('test@test.com', 'password');
 
-    // Enter valid credentials
-    await usernameInput.fill(VALID_USERNAME);
-    await passwordInput.fill(VALID_PASSWORD);
-
-    // Click the login button and wait for navigation to the dashboard
-    await Promise.all([
-      page.waitForURL('**/dashboard'), // Assert URL redirect (replace with actual dashboard URL pattern)
-      loginButton.click(),
-    ]);
-
-    // Assert successful redirection to the home/dashboard page
-    // For demoblaze.com, this would be asserting the welcome message. For example-login.com, assuming /dashboard
-    await expect(page).toHaveURL(/dashboard/); // Asserts URL contains /dashboard
-    // Optional: Assert presence of a post-login element, e.g., a welcome message or dashboard element
-    // await expect(page.locator('h1:has-text("Welcome, testuser")')).toBeVisible();
+    // Assert successful redirection to the home page or presence of a logged-in indicator
+    // On automationexercise.com, after successful login, the "Signup / Login" link changes to "Logged in as Username" or similar
+    await expect(page.locator('a:has-text("Logged in as")')).toBeVisible();
+    await expect(page).toHaveURL('/'); // Should redirect to the home page after login
   });
 
   /**
@@ -62,28 +44,20 @@ test.describe('Login Functionality Tests', () => {
    */
   test('should display an error message for invalid credentials', async ({ page }) => {
     // Generate random invalid credentials
-    const invalidUsername = generateRandomString(10);
-    const invalidPassword = generateRandomString(12);
+    const invalidEmail = `invalid_${generateRandomString(8)}@example.com`;
+    const invalidPassword = generateRandomString(10);
 
-    // Locate username, password input fields, submit button, and error message element
-    const usernameInput = page.locator('input[name="username"]');
-    const passwordInput = page.locator('input[name="password"]');
-    const loginButton = page.locator('button[type="submit"]');
-    const errorMessage = page.locator('div[data-testid="error-message"]');
+    // Enter invalid credentials and click login using POM method
+    await loginPage.login(invalidEmail, invalidPassword);
 
-    // Enter invalid credentials
-    await usernameInput.fill(invalidUsername);
-    await passwordInput.fill(invalidPassword);
-
-    // Click the login button
-    await loginButton.click();
-
-    // Assert that the URL remains the same (no redirection) or is still on the login page
-    await expect(page).toHaveURL(BASE_URL); // Assert URL stays on the login page
+    // Assert that the URL remains on the login page
+    await expect(page).toHaveURL(/login/); // Assert URL stays on the login page
 
     // Assert that the error message is visible and contains expected text
+    // You may need to inspect the actual error element on automationexercise.com for a more precise locator.
+    const errorMessage = page.locator('.form-group.has-error'); // Placeholder locator - adjust as needed based on inspection
     await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText(/Invalid username or password/); // Adjust text based on actual error message
+    await expect(errorMessage).toContainText(/Incorrect email or password/); // Adjust text based on actual error message
   });
 
 }); 

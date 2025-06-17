@@ -1,14 +1,22 @@
 import { test, expect } from '@playwright/test';
-import * as testData from './test-data.json';
+import * as fs from 'fs';
+import * as path from 'path';
+import { LoginPage } from '../Task 1/pages/LoginPage'; // Import the LoginPage POM
 
-// Define a base URL for your dummy login website
-const BASE_URL = 'https://example-login.com';
+// Define the path to your test data JSON file
+const TEST_DATA_PATH = path.join(__dirname, 'test-data.json');
 
-test.describe('Data-Driven Login Tests', () => {
+// Read and parse the test data synchronously
+const testData = JSON.parse(fs.readFileSync(TEST_DATA_PATH, 'utf-8'));
 
-  // Before each test, navigate to the login page
+test.describe('Data-Driven Login Tests (Task 4)', () => {
+  let loginPage: LoginPage;
+
+  // Before each test, navigate to the base URL and then to the login page
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE_URL);
+    loginPage = new LoginPage(page);
+    await page.goto('/'); // Go to the base URL defined in playwright.config.ts
+    await loginPage.navigateToLoginPage(); // Navigate to the login page using POM
   });
 
   // Iterate over each credential set in the test data
@@ -16,30 +24,20 @@ test.describe('Data-Driven Login Tests', () => {
     const { username, password, expected } = data;
 
     test(`Login with username: ${username || '[empty]'} and password: ${password || '[empty]'} - expected: ${expected}`, async ({ page }) => {
-      // Locate username, password input fields and the submit button
-      const usernameInput = page.locator('input[name="username"]');
-      const passwordInput = page.locator('input[name="password"]');
-      const loginButton = page.locator('button[type="submit"]');
-      const errorMessage = page.locator('div[data-testid="error-message"]');
-
-      // Enter credentials
-      await usernameInput.fill(username);
-      await passwordInput.fill(password);
-
-      // Click the login button
-      await loginButton.click();
+      // Perform login using the LoginPage POM method
+      await loginPage.login(username, password);
 
       if (expected === 'success') {
-        // Assert successful login: URL redirection to dashboard
-        await expect(page).toHaveURL(/dashboard/); // Adjust with actual dashboard URL pattern
+        // Assert successful login: presence of a logged-in indicator
+        await expect(page.locator('a:has-text("Logged in as")')).toBeVisible();
+        await expect(page).toHaveURL('/'); // Should redirect to the home page after login
         console.log(`✅ Login successful for username: ${username}`);
-        // Optional: Assert presence of a post-login element
-        // await expect(page.locator('h1:has-text("Welcome, ")')).toBeVisible();
       } else {
         // Assert failed login: URL remains on login page and error message is visible
-        await expect(page).toHaveURL(BASE_URL); // Assert URL stays on the login page
+        await expect(page).toHaveURL(/login/); // Assert URL stays on the login page
+        const errorMessage = page.locator('.form-group.has-error'); // Placeholder locator - adjust as needed based on inspection
         await expect(errorMessage).toBeVisible();
-        // You might want to refine the error message assertion based on actual messages from the dummy site
+        await expect(errorMessage).toContainText(/Incorrect email or password/); // Adjust text based on actual error message
         console.log(`❌ Login failed as expected for username: ${username}. Error message visible.`);
       }
     });
