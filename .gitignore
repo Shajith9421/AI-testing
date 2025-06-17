@@ -1,0 +1,10 @@
+# Node modules
+node_modules/
+
+# Playwright artifacts
+playwright-report/
+test-results/
+
+# IDE specific files
+.vscode/
+.idea/ 
