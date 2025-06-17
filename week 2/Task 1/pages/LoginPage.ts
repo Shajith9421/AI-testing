@@ -6,6 +6,7 @@ export class LoginPage {
   readonly emailInput: string;
   readonly passwordInput: string;
   readonly loginButton: string;
+  readonly errorMessage: string;
 
   constructor(page: Page) {
     this.page = page;
@@ -13,6 +14,7 @@ export class LoginPage {
     this.emailInput = 'input[data-qa="login-email"]';
     this.passwordInput = 'input[data-qa="login-password"]';
     this.loginButton = 'button[data-qa="login-button"]';
+    this.errorMessage = 'p[style="color: red;"]';
   }
 
   async navigateToLoginPage() {

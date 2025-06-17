@@ -11,8 +11,8 @@ export class ProductPage {
     this.page = page;
     this.productDetailLink = (productName: string) => `a:has-text('${productName}')`;
     this.addToCartButtonOnDetailPage = 'button.btn.btn-default.cart';
-    this.productCard = (productName: string) => `div.productinfo:has-text('${productName}')`;
-    this.addToCartButtonOnListing = (productName: string) => `div.single-products:has-text('${productName}') button.add-to-cart`;
+    this.productCard = (productName: string) => `div.col-sm-4:has(p:has-text('${productName}')) div.single-products`;
+    this.addToCartButtonOnListing = (productName: string) => `div.col-sm-4:has(p:has-text('${productName}')) a.add-to-cart`;
   }
 
   async selectProduct(productName: string) {
