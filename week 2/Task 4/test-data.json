@@ -1,7 +1,0 @@
-[
-  { "username": "testuser", "password": "Test@1234", "expected": "success" },
-  { "username": "invalid_user", "password": "wrong_pass", "expected": "failure" },
-  { "username": "", "password": "blank_username", "expected": "failure" },
-  { "username": "testuser", "password": "", "expected": "failure" },
-  { "username": "admin' OR 1=1 --", "password": "hack", "expected": "failure" }
-] 
